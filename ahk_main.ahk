@@ -37,10 +37,38 @@ BeginScreenTimeoutBypass()
 
 global UserProfilePath := EnvGet("USERPROFILE")
 
+; I HATE these magic strings, but I cannot think of a better way to do this right now...
+global machines:= [
+    "ThinkPad T15 Gen 1", 
+    "T15", 
+    "T14"
+    ]
+
+
+global ShouldRebindPrintscreen := IsCurrentMachine(machines)
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;                      Global key remaps                                    ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+; ###########   Key rebinds   ########### ;
+; CapsLock = Hide Slack
+CapsLock::{
+    if WinExist("ahk_exe slack.exe"){
+        WinHide "ahk_exe slack.exe"
+        return
+    }
+}
+
+; only if the machine is in the list of machines do we rebind PrtSc
+#HotIf ShouldRebindPrintscreen
+PrintScreen::AppsKey
+#HotIf
+
+NumLock::return
+
+
+; ###########   AHK control Stuff   ########### ;
 ; Win+Ctrl+R = Reload AHK script
 #^r::{
     TrayTip "AHK Script", "Script Reloading"
@@ -52,19 +80,13 @@ global UserProfilePath := EnvGet("USERPROFILE")
 ; Win+Ctrl+E = Edit script in VS Code
 #^e::Run '"code" "' A_ScriptFullPath '"'
 
+
+; ###########   Other Stuff   ########### ;
 ;Ctrl + Win + Escape - Reload proxy bypass
 ;^#Esc::UpdateBypassList() ;unused
 
 ;Win + Escape - Toggle proxy between local and network
 ;#Esc::ToggleProxy(ProxySettingsKey) ;unused
-
-; CapsLock = Hide Slack
-CapsLock::{
-    if WinExist("ahk_exe slack.exe"){
-        WinHide "ahk_exe slack.exe"
-        return
-    }
-}
 
 ; Ctrl+Shift+V = Paste as comma-separated
 ^+v::{
@@ -216,3 +238,19 @@ WheelRight::SendInput "^+-"
 MButton::SendInput "{F12}"
 #HotIf
 
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;                          Oddly specific functions                         ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+IsCurrentMachine(machines) {
+    wmi := ComObjGet("winmgmts:")
+    for sys in wmi.ExecQuery("SELECT * FROM Win32_ComputerSystemProduct") {
+        version := sys.Version
+        for machine in machines {
+            if InStr(version, machine)
+                return true
+        }
+    }
+    return false
+}
