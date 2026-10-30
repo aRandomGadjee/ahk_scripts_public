@@ -9,3 +9,11 @@ To use these scripts, need to install AutoHotKey (v2.x) from [AutoHotKey.com](ht
 
 #### Note:
 You don't need to run any of the otehr scripts as these are referenced by the "ahk_main" file and contain no active hotkeys.
+
+
+
+<div align="center">
+  <a href="https://www.buymeacoffee.com/aRandomGadjee" target="_blank">
+    <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" width="200"/>
+  </a>
+</div>
